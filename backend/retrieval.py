@@ -41,7 +41,7 @@ def get_answer(user_query: str) -> dict:
     ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
 
     try:
-        llm = ChatOllama(model="llama3", temperature=0.2, base_url=ollama_base_url)
+        llm = ChatOllama(model="qwen2.5-coder:1.5b", temperature=0.2, base_url=ollama_base_url)
 
         prompt = PromptTemplate.from_template("""You are an expert software engineer.
 

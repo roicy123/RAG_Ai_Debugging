@@ -56,7 +56,7 @@ AI_Debugging_Assistant/
 
 ### 1. Backend Setup
 1. Open a terminal and navigate to the `backend/` directory.
-2. Create and activate a virtual environment:
+2. Create and activate a Python virtual environment:
    ```bash
    python -m venv venv
    # Windows
@@ -64,13 +64,19 @@ AI_Debugging_Assistant/
    # Mac/Linux
    source venv/bin/activate
    ```
-3. Install dependencies:
+3. Install backend dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-4. Create a `.env` file in the `backend/` directory and add your Google Gemini API Key (or setup for local Ollama):
+4. If you are using local Ollama, create a `.env` file in the `backend/` directory and set the endpoint URL only if you need a non-default host or port:
    ```ini
-   GOOGLE_API_KEY=your_gemini_api_key_here
+   OLLAMA_BASE_URL=http://127.0.0.1:11434
+   ```
+   If Ollama is running on the default local port, this file is optional.
+
+   Start your Ollama server first before starting the backend:
+   ```bash
+   ollama serve
    ```
 5. Run the FastAPI server:
    ```bash
