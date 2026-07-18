@@ -4,9 +4,14 @@ import json
 import pickle
 import time
 
+# Evaluation Corpus:
+# Using the `psf/requests` repository (specifically the `src/requests` folder) as the sample repo.
+# Version: Fetched via git clone --depth 1 from https://github.com/psf/requests.git (as of eval date).
+# This provides a realistic 20-file Python codebase with diverse concepts.
+
 sys.path.append(os.path.abspath("backend"))
 
-from backend.ingestion import ingest_codebase
+from ingestion import ingest_codebase
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.retrievers import BM25Retriever

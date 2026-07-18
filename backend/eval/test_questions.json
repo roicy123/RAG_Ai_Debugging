@@ -1,17 +1,135 @@
 [
-  {"question": "How is the ZIP file extracted and validated against Zip-Slip attacks?", "expected_files": ["backend/ingestion.py"]},
-  {"question": "What embedding model is used and why?", "expected_files": ["backend/ingestion.py", "backend/retrieval.py"]},
-  {"question": "How is python code split into chunks?", "expected_files": ["backend/ingestion.py"]},
-  {"question": "How are line numbers calculated for document chunks?", "expected_files": ["backend/ingestion.py"]},
-  {"question": "Where does the codebase saving and loading of the FAISS vector database happen?", "expected_files": ["backend/ingestion.py", "backend/retrieval.py"]},
-  {"question": "How is BM25 index built and saved?", "expected_files": ["backend/ingestion.py"]},
-  {"question": "What is the hybrid retrieval mechanism and what are the weights?", "expected_files": ["backend/retrieval.py"]},
-  {"question": "How is cross-encoder reranking implemented?", "expected_files": ["backend/retrieval.py"]},
-  {"question": "How is conversation history handled and combined into final questions?", "expected_files": ["backend/retrieval.py"]},
-  {"question": "What is the prompt that is provided to the LLM model for generation?", "expected_files": ["backend/retrieval.py"]},
-  {"question": "How do FastAPI application endpoints handle zip uploads?", "expected_files": ["backend/main.py"]},
-  {"question": "Where is the SQlite table created to capture query statistics?", "expected_files": ["backend/logging_db.py"]},
-  {"question": "How does the Streamlit UI upload the codebase for embedding?", "expected_files": ["frontend/app.py"]},
-  {"question": "How are chunk line ranges displayed in the frontend expander?", "expected_files": ["frontend/app.py"]},
-  {"question": "How is the stats endpoint implemented?", "expected_files": ["backend/main.py"]}
+    {
+        "question": "What is the CaseInsensitiveDict class used for?",
+        "expected_files": [
+            "requests/structures.py"
+        ]
+    },
+    {
+        "question": "Where is the HTTPAdapter defined?",
+        "expected_files": [
+            "requests/adapters.py"
+        ]
+    },
+    {
+        "question": "How are cookies extracted into a cookie jar?",
+        "expected_files": [
+            "requests/cookies.py"
+        ]
+    },
+    {
+        "question": "What exception is raised when reading times out?",
+        "expected_files": [
+            "requests/exceptions.py"
+        ]
+    },
+    {
+        "question": "Where is the DEFAULT_CA_BUNDLE_PATH set?",
+        "expected_files": [
+            "requests/certs.py"
+        ]
+    },
+    {
+        "question": "How are redirects handled securely in sessions?",
+        "expected_files": [
+            "requests/sessions.py"
+        ]
+    },
+    {
+        "question": "What does a session do when it faces a connection timeout?",
+        "expected_files": [
+            "requests/sessions.py",
+            "requests/adapters.py",
+            "requests/exceptions.py"
+        ]
+    },
+    {
+        "question": "How does the code handle basic authentication strings?",
+        "expected_files": [
+            "requests/auth.py"
+        ]
+    },
+    {
+        "question": "Where is the HTTP status code dictionary mapping defined?",
+        "expected_files": [
+            "requests/status_codes.py"
+        ]
+    },
+    {
+        "question": "Who defines the PreparedRequest and Request objects?",
+        "expected_files": [
+            "requests/models.py"
+        ]
+    },
+    {
+        "question": "How is proxy configuration parsed and managed?",
+        "expected_files": [
+            "requests/utils.py"
+        ]
+    },
+    {
+        "question": "What logic handles chunked stream responses?",
+        "expected_files": [
+            "requests/models.py"
+        ]
+    },
+    {
+        "question": "Are there utilities to guess the mimetype of a file upload?",
+        "expected_files": [
+            "requests/utils.py"
+        ]
+    },
+    {
+        "question": "How are retries configured in the adapter?",
+        "expected_files": [
+            "requests/adapters.py"
+        ]
+    },
+    {
+        "question": "Which file is the main entrypoint exposed for simple http methods?",
+        "expected_files": [
+            "requests/api.py"
+        ]
+    },
+    {
+        "question": "Where are request headers merged with session headers?",
+        "expected_files": [
+            "requests/sessions.py"
+        ]
+    },
+    {
+        "question": "What kind of auth helper functions exist for digest authentication?",
+        "expected_files": [
+            "requests/auth.py"
+        ]
+    },
+    {
+        "question": "How does the system ensure SSL verification uses the right certs?",
+        "expected_files": [
+            "requests/certs.py",
+            "requests/sessions.py",
+            "requests/adapters.py"
+        ]
+    },
+    {
+        "question": "If JSON decoding fails, what specific exceptions are caught or raised?",
+        "expected_files": [
+            "requests/models.py",
+            "requests/exceptions.py"
+        ]
+    },
+    {
+        "question": "What function exposes the monkeypatch for standard library modules?",
+        "expected_files": [
+            "requests/packages.py",
+            "requests/__init__.py"
+        ]
+    },
+    {
+        "question": "Where is `urllib3` integrated into the project?",
+        "expected_files": [
+            "requests/adapters.py",
+            "requests/packages.py"
+        ]
+    }
 ]

@@ -6,7 +6,7 @@ import sys
 
 # Ensure backend imports work
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from ingestion import extract_zip, get_text_splitter_for_ext
+from ingestion import extract_zip, get_text_splitter_for_ext, assign_line_numbers
 from langchain_community.document_loaders import TextLoader
 
 def test_zip_slip_rejection():
@@ -31,17 +31,8 @@ def test_chunking_line_numbers():
         split_docs = splitter.split_documents(docs)
         
         file_content = docs[0].page_content
-        current_idx = 0
-        for d in split_docs:
-            chunk_text = d.page_content
-            start_idx = file_content.find(chunk_text, current_idx)
-            start_line = file_content.count('\n', 0, start_idx) + 1
-            end_line = start_line + chunk_text.count('\n')
-            
-            d.metadata['start_line'] = start_line
-            d.metadata['end_line'] = end_line
-            current_idx = start_idx + len(chunk_text)
+        assign_line_numbers(split_docs, file_content)
             
         assert len(split_docs) > 0
         assert split_docs[0].metadata['start_line'] == 1
-        assert split_docs[-1].metadata['end_line'] >= 1
+        assert split_docs[-1].metadata['end_line'] == 7

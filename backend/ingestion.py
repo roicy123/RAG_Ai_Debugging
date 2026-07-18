@@ -11,6 +11,8 @@ from langchain_community.vectorstores import FAISS
 UPLOAD_DIR = "uploads"
 VECTOR_STORE_DIR = "vector_store"
 
+embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+
 def extract_zip(zip_path: str, extract_to: str) -> None:
     if os.path.exists(extract_to):
         shutil.rmtree(extract_to)
@@ -26,6 +28,25 @@ def extract_zip(zip_path: str, extract_to: str) -> None:
             if os.path.commonpath([target_path, extract_to_abs]) != extract_to_abs:
                 raise ValueError(f"Malicious zip file containing path traversal: {name}")
         zip_ref.extractall(extract_to)
+
+def assign_line_numbers(split_docs: list, file_content: str) -> None:
+    current_idx = 0
+    for d in split_docs:
+        chunk_text = d.page_content
+        start_idx = file_content.find(chunk_text, current_idx)
+        if start_idx == -1:
+            start_idx = file_content.find(chunk_text)
+            if start_idx == -1:
+                start_idx = 0
+                
+        start_line = file_content.count('\n', 0, start_idx) + 1
+        end_line = start_line + chunk_text.count('\n')
+        
+        d.metadata['start_line'] = start_line
+        d.metadata['end_line'] = end_line
+        
+        if start_idx != -1:
+            current_idx = start_idx + len(chunk_text)
 
 def get_text_splitter_for_ext(ext: str):
     """Returns a code-aware text splitter based on the file extension."""
@@ -86,29 +107,16 @@ def ingest_codebase(zip_path: str) -> int:
                 else:
                     file_content = ""
                 
-                # Enhance metadata with precise source path and line numbers
-                current_idx = 0
+                # Enhance metadata with precise source path
                 for d in split_docs:
                     rel_path = os.path.relpath(file_path, UPLOAD_DIR)
                     d.metadata['source_file'] = rel_path
                     
-                    if file_content:
-                        chunk_text = d.page_content
-                        start_idx = file_content.find(chunk_text, current_idx)
-                        if start_idx == -1:
-                            start_idx = file_content.find(chunk_text)
-                            if start_idx == -1:
-                                start_idx = 0
-                                
-                        start_line = file_content.count('\n', 0, start_idx) + 1
-                        end_line = start_line + chunk_text.count('\n')
-                        
-                        d.metadata['start_line'] = start_line
-                        d.metadata['end_line'] = end_line
-                        
-                        if start_idx != -1:
-                            current_idx = start_idx + len(chunk_text)
-                    else:
+                # Enhance metadata with line numbers
+                if file_content:
+                    assign_line_numbers(split_docs, file_content)
+                else:
+                    for d in split_docs:
                         d.metadata['start_line'] = 1
                         d.metadata['end_line'] = 1
                 
@@ -119,8 +127,6 @@ def ingest_codebase(zip_path: str) -> int:
     if not docs:
         raise ValueError("No understandable text/code files found in the ZIP.")
         
-    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-    
     # Save the chunked vectors to a local FAISS store
     vectorstore = FAISS.from_documents(docs, embeddings)
     vectorstore.save_local(VECTOR_STORE_DIR)

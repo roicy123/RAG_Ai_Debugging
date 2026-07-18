@@ -25,9 +25,8 @@ def test_hybrid_retrieval():
     
 def test_reranking_empty():
     try:
-        retrieved_docs = []
-        if retrieved_docs:
-            pairs = [["query", doc.page_content] for doc in retrieved_docs]
-            reranker_model.predict(pairs)
+        # CrossEncoder.predict([]) natively handles empty arrays and returns gracefully
+        # Check this by invoking it directly with no if-guards.
+        reranker_model.predict([])
     except Exception as e:
-        pytest.fail(f"Reranking empty list caused exception: {e}")
+        pytest.fail(f"Reranking empty list crashed: {e}")

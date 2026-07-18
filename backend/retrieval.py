@@ -35,6 +35,7 @@ HYBRID_WEIGHTS = [0.6, 0.4]
 
 # Load reranker model at module level so it doesn't reload on every query
 reranker_model = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
 def get_answer(user_query: str, chat_history: list[dict] | None = None) -> dict:
     if not os.path.exists(VECTOR_STORE_DIR):
@@ -73,7 +74,6 @@ Latest Question: {user_query}
     
     try:
         # Load embeddings and vector database
-        embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
         # allow_dangerous_deserialization is required for local FAISS loads in newer LangChain versions
         vectorstore = FAISS.load_local(VECTOR_STORE_DIR, embeddings, allow_dangerous_deserialization=True)
         
