@@ -4,13 +4,15 @@ A production-level Retrieval-Augmented Generation (RAG) system designed to help 
 
 ## 🚀 Features
 - **Code-Aware Chunking**: Uses language-specific processing (AST-like logic via Langchain's TextSplitters) to break down code logically without breaking functions.
-- **Source Code References**: Returns exact file names and line/snippet references when explaining bugs.
-- **Session Memory**: Remembers past interactions in the Streamlit UI to allow for follow-up questions.
-- **Local Embedding**: Uses `HuggingFaceEmbeddings` (`sentence-transformers/all-MiniLM-L6-v2`) locally to avoid embedding API costs. completely free.
-- **Caching**: Saves the FAISS vector database locally so you don't need to re-embed the code every time you restart the server.
-- **Clean UI**: Built with Streamlit for a chatty, intuitive experience.
+- **Source Code References**: Returns exact file names and accurate line range metadata when explaining bugs.
+- **Session Memory**: Uses LLM-based query rewriting on chat history for intelligent follow-up questions.
+- **Hybrid Retrieval & Reranking**: Uses FAISS (vector similarity) + BM25 (keyword matching) combined via Reciprocal Rank Fusion, followed by a Cross-Encoder Reranker (`ms-marco-MiniLM-L-6-v2`) to pull only the exact relevant snippets.
+- **Observability**: Logs queries, rewritten queries, latencies, and chunks retrieved in a local SQLite database, viewable via the `/stats` API.
+- **Clean UI**: Built with Streamlit for a chatty, intuitive experience, with transparent context inspection and rerank scores.
 
 ---
+
+## 🏗️ Architecture
 
 ## 🏗️ Architecture
 
@@ -18,17 +20,22 @@ A production-level Retrieval-Augmented Generation (RAG) system designed to help 
 graph TD
     A[User Uploads ZIP] --> B(FastAPI Endpoint)
     B --> C{LangChain Document Loaders}
-    C --> D[Language-Specific Text Splitter]
+    C --> D[Language-Specific Text Splitter + Line Number Calculation]
     D --> E[HuggingFace Embeddings]
     E --> F[(FAISS Vector Database)]
-    
-    G[User Asks Question] --> H(FastAPI /ask Endpoint)
-    H --> I[Embed Question]
-    I --> J{Similarity Search in FAISS}
-    J --> K[Retrieve Top K Code Chunks]
-    K --> L[LLM prompt with context & history]
-    L --> M[Generate Answer with File References]
-    M --> N(Streamlit Frontend)
+    D --> G[(BM25 Keyword Index)]
+
+    H[User Asks Question] --> I{Rewrite using Conversation History}
+    I --> J[Embed Search Query]
+    J --> K{Hybrid Search}
+    K -->|Weights: 0.6| F
+    K -->|Weights: 0.4| G
+    F --> L[Retrieve Top 15 Candidates]
+    G --> L
+    L --> M[Cross-Encoder Reranking]
+    M --> N[Top 6 Relevant Chunks]
+    N --> O[Generate Answer with LLM + Grounding Prompt]
+    O --> P(Streamlit Frontend & SQlite Logging)
 ```
 
 ---
@@ -53,8 +60,16 @@ AI_Debugging_Assistant/
 ---
 
 ## ⚙️ Setup & Installation
+### Using Docker (Recommended)
+1. Ensure Docker and Docker Compose are installed and running.
+2. Clone the repository and navigate to its root directory.
+3. Build and start the services:
+   ```bash
+   docker-compose up --build
+   ```
+4. Access the Streamlit interface at `http://localhost:8501`.
 
-### 1. Backend Setup
+### Manual Setup (Backend)
 1. Open a terminal and navigate to the `backend/` directory.
 2. Create and activate a Python virtual environment:
    ```bash
@@ -93,6 +108,12 @@ AI_Debugging_Assistant/
    ```bash
    streamlit run app.py
    ```
+
+---
+
+## 📊 Evaluation
+
+We evaluate the retrieval system using a standalone harness. See the before-and-after numbers comparing Vector-only vs Hybrid vs Hybrid+Reranking in our [Results Documentation](backend/eval/results.md).
 
 ---
 

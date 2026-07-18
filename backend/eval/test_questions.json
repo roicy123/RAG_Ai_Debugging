@@ -1,0 +1,17 @@
+[
+  {"question": "How is the ZIP file extracted and validated against Zip-Slip attacks?", "expected_files": ["backend/ingestion.py"]},
+  {"question": "What embedding model is used and why?", "expected_files": ["backend/ingestion.py", "backend/retrieval.py"]},
+  {"question": "How is python code split into chunks?", "expected_files": ["backend/ingestion.py"]},
+  {"question": "How are line numbers calculated for document chunks?", "expected_files": ["backend/ingestion.py"]},
+  {"question": "Where does the codebase saving and loading of the FAISS vector database happen?", "expected_files": ["backend/ingestion.py", "backend/retrieval.py"]},
+  {"question": "How is BM25 index built and saved?", "expected_files": ["backend/ingestion.py"]},
+  {"question": "What is the hybrid retrieval mechanism and what are the weights?", "expected_files": ["backend/retrieval.py"]},
+  {"question": "How is cross-encoder reranking implemented?", "expected_files": ["backend/retrieval.py"]},
+  {"question": "How is conversation history handled and combined into final questions?", "expected_files": ["backend/retrieval.py"]},
+  {"question": "What is the prompt that is provided to the LLM model for generation?", "expected_files": ["backend/retrieval.py"]},
+  {"question": "How do FastAPI application endpoints handle zip uploads?", "expected_files": ["backend/main.py"]},
+  {"question": "Where is the SQlite table created to capture query statistics?", "expected_files": ["backend/logging_db.py"]},
+  {"question": "How does the Streamlit UI upload the codebase for embedding?", "expected_files": ["frontend/app.py"]},
+  {"question": "How are chunk line ranges displayed in the frontend expander?", "expected_files": ["frontend/app.py"]},
+  {"question": "How is the stats endpoint implemented?", "expected_files": ["backend/main.py"]}
+]

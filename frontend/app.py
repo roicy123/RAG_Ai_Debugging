@@ -35,6 +35,13 @@ with st.sidebar:
             st.warning("Please select a ZIP file to upload.")
 
     st.divider()
+    st.header("🔧 Pipeline Info")
+    st.markdown("- **Search Strategy:** Hybrid (Vector + BM25)")
+    st.markdown("- **Vector / BM25 Weights:** 0.6 / 0.4")
+    st.markdown("- **Base Candidates (k):** 15")
+    st.markdown("- **Reranker:** cross-encoder/ms-marco-MiniLM-L-6-v2")
+    st.markdown("- **Final Contexts:** 6")
+    st.divider()
     
     if st.button("View Indexed Files"):
         try:
@@ -59,7 +66,11 @@ for message in st.session_state.messages:
         if "contexts" in message and message["contexts"]:
             with st.expander("See Exact Code References"):
                 for doc in message["contexts"]:
-                    st.markdown(f"**File:** `{doc['source']}`")
+                    start = doc.get('start_line', '?')
+                    end = doc.get('end_line', '?')
+                    score = doc.get('rerank_score')
+                    score_str = f" — relevance score: {score:.2f}" if score is not None else ""
+                    st.markdown(f"**File:** `{doc['source']}` (lines {start}-{end}){score_str}")
                     st.code(doc['content'])
 
 # User Query Input
@@ -74,7 +85,12 @@ if query := st.chat_input("E.g., What are the main issues in main.py?"):
     with st.chat_message("assistant"):
         with st.spinner("Brainstorming & Searching codebase..."):
             try:
-                payload = {"query": query}
+                # Get last 6 messages (3 user/assistant pairs) excluding the current query
+                history_for_payload = [
+                    {"role": msg["role"], "content": msg["content"]} 
+                    for msg in st.session_state.messages[:-1][-6:]
+                ]
+                payload = {"query": query, "history": history_for_payload}
                 res = requests.post(f"{backend_url}/ask", json=payload)
                 
                 if res.status_code == 200:
@@ -92,9 +108,19 @@ if query := st.chat_input("E.g., What are the main issues in main.py?"):
                             for doc in raw_contexts:
                                 source_val = doc.get('source_file')
                                 content_val = doc.get('content')
-                                st.markdown(f"**File:** `{source_val}`")
+                                start_val = doc.get('start_line', '?')
+                                end_val = doc.get('end_line', '?')
+                                score_val = doc.get('rerank_score')
+                                score_str = f" — relevance score: {score_val:.2f}" if score_val is not None else ""
+                                st.markdown(f"**File:** `{source_val}` (lines {start_val}-{end_val}){score_str}")
                                 st.code(content_val)
-                                display_contexts.append({"source": source_val, "content": content_val})
+                                display_contexts.append({
+                                    "source": source_val, 
+                                    "content": content_val,
+                                    "start_line": start_val,
+                                    "end_line": end_val,
+                                    "rerank_score": score_val
+                                })
                     
                     # 3. Add to history
                     st.session_state.messages.append({

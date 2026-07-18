@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 python-multipart
+rank_bm25
 langchain
 langchain-community
 langchain-huggingface
@@ -8,5 +9,7 @@ langchain-ollama
 langchain-text-splitters
 faiss-cpu
 sentence-transformers
+pytest
+httpx
 unstructured
 python-dotenv

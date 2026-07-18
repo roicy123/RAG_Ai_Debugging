@@ -6,6 +6,7 @@ from pydantic import BaseModel
 import uvicorn
 from ingestion import ingest_codebase
 from retrieval import get_answer
+from logging_db import get_stats
 
 app = FastAPI(title="AI Debugging Assistant API")
 
@@ -20,12 +21,16 @@ app.add_middleware(
 
 class QueryRequest(BaseModel):
     query: str
+    history: list[dict] = []
 
 @app.post("/upload-code")
-async def upload_code(file: UploadFile = File(...)):
+def upload_code(file: UploadFile = File(...)):
     """Accepts a ZIP file of the codebase, extracts it, and creates vector embeddings."""
     if not file.filename.endswith('.zip'):
         raise HTTPException(status_code=400, detail="Only ZIP files are supported.")
+        
+    if file.size and file.size > 50 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="File too large. Maximum size is 50MB.")
         
     temp_zip_path = f"temp_{file.filename}"
     
@@ -47,16 +52,17 @@ async def upload_code(file: UploadFile = File(...)):
     return {"message": "Codebase successfully uploaded and processed.", "chunks_created": docs_processed}
 
 @app.post("/ask")
-async def ask_question(request: QueryRequest):
+def ask_question(request: QueryRequest):
     """Answers user queries based on the vectorized codebase using RAG."""
     try:
-        result = get_answer(request.query)
+        result = get_answer(request.query, request.history)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/list-files")
-async def list_files():
+def list_files():
+    # Making list_files sync as well for consistency across all endpoint signatures.
     """Returns a list of all parsed and extracted files."""
     upload_dir = "uploads"
     if not os.path.exists(upload_dir):
@@ -74,6 +80,14 @@ async def list_files():
                 all_files.append(file_path)
             
     return {"files": all_files}
+
+@app.get("/stats")
+def stats():
+    """Returns database query statistics."""
+    try:
+        return get_stats()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
